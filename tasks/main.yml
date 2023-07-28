@@ -1,2 +1,119 @@
----
 # tasks file for ansible-role-llm-on-prem
+# Sets up an LLM on a box. WIP.
+
+# Group Vars has this (uses 1password for secure token storage):
+# ai_huggingface_token: "{{ lookup('community.general.onepassword', 'home-network-huggingface-read-token', field='password', vault='YourVaultName') }}"
+# ai_openai_api_key: "{{ lookup('community.general.onepassword', 'home-network-openai-api-key', field='password', vault='YourVaultName') }}"
+
+# And then the J2 scripts can just read like:
+# HF_TOKEN="{{ ai_huggingface_token }}"
+# OPENAI_API_KEY="{{ ai_openai_api_key }}"
+
+---
+- hosts: llm_on_prem
+  name: An LLM on a box
+  become: true
+  become_user: docker
+  gather_facts: true
+  vars:
+    # The Profile as per RAD-Ninjas scripts. CPU, GPU, metal (Mac), etc.
+    ai_profile: cpu
+    template_dir: ../templates
+    docker_home: /home/docker
+    llm_on_prem_url: https://github.com/RAD-Ninjas/llm-on-prem
+    llm_on_prem_install_script: /home/docker/llm-on-prem/models/scripts/start-mac-worker.sh
+    llm_on_prem_dockerfile: /home/docker/llm-on-prem/docker-compose.yml
+  pre_tasks:
+  tasks:
+    - name: Install python3
+      become_user: root
+      ansible.builtin.package:
+        name: python3
+        state: present
+    - name: Install python3-pip
+      become_user: root
+      ansible.builtin.package:
+        name: python3-pip
+        state: present
+    - name: Upgrade Pip from Pip
+      ansible.builtin.command:
+        cmd: pip install -U pip
+    - name: Install python3-venv
+      become_user: root
+      ansible.builtin.package:
+        name: python3-venv
+        state: present
+    - name: Run pip install docker-compose
+      ansible.builtin.command:
+        cmd: pip3 install docker-compose
+    - name: Clone llm-on-prem
+      ansible.builtin.git:
+        repo: "{{ llm_on_prem_url }}"
+        dest: "{{ docker_home }}/llm-on-prem"
+        version: main
+        force: true
+        depth: 1
+    - name: Set up funky script to download models
+      ansible.builtin.template:
+        src: "{{ template_dir }}/home-pve/services/llm-on-prem/download-model.sh.j2"
+        dest: "{{ docker_home }}/llm-on-prem/download-model.sh"
+        owner: docker
+        group: docker
+        mode: "0755"
+    - name: Set up LLM on prem .env
+      ansible.builtin.template:
+        src: "{{ template_dir }}/home-pve/services/llm-on-prem/dotenv.j2"
+        dest: "{{ docker_home }}/llm-on-prem/.env"
+        owner: docker
+        group: docker
+        mode: "0644"
+    - name: Set up LLM on prem .env.mac
+      ansible.builtin.template:
+        src: "{{ template_dir }}/home-pve/services/llm-on-prem/dotenv.mac.j2"
+        dest: "{{ docker_home }}/llm-on-prem/.env.mac"
+        owner: docker
+        group: docker
+        mode: "0644"
+    - name: Run Docker compose build
+      community.docker.docker_compose:
+        project_src: "{{ docker_home }}/llm-on-prem"
+        build: true
+        pull: true
+    - name: Make venv dir
+      ansible.builtin.file:
+        path: "{{ docker_home }}/llm-on-prem/venv"
+        state: directory
+        owner: docker
+        group: docker
+        mode: "0755"
+    - name: Check for python venv
+      ansible.builtin.stat:
+        path: "{{ docker_home }}/llm-on-prem/venv/bin/activate"
+      register: venv_exists
+    - name: Create activate python venv
+      ansible.builtin.command:
+        cmd: python3 -m venv venv
+        chdir: "{{ docker_home }}/llm-on-prem"
+      when: not venv_exists.stat.exists        
+    # Comment task out if you want to use the GPU (which your container needs to be able to get to)
+    # - name: First Install torch from the CPU repo
+    #   ansible.builtin.pip:
+    #     name: torch
+    #     virtualenv: "{{ docker_home }}/llm-on-prem/venv"
+    #     extra_args: --index-url https://download.pytorch.org/whl/cpu
+    - name: Install requirements on venv
+      ansible.builtin.pip:
+        requirements: "{{ docker_home }}/llm-on-prem/models/assets/mac-requirements.txt"
+        virtualenv: "{{ docker_home }}/llm-on-prem/venv"
+        # The pytorch needs to install from this index or it will fail because the LXC container is unprivileged.
+    - name: Check for HF Worker
+      ansible.builtin.stat:
+        # TODO I wish I could have the cache name for the model here.
+        # Ideally I could run the python module that determines the cache location and use that as the path. Oy.
+        path: "{{ docker_home }}/.cache/huggingface/hub/version.txt"
+      register: hf_cache_exists
+    - name: Run the download model script
+      ansible.builtin.command:
+          cmd: ./download_model.sh
+          chdir: "{{ docker_home }}/llm-on-prem"
+      when: not hf_cache_exists.stat.exists        
