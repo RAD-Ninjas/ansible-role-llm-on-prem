@@ -7,7 +7,6 @@
   become_user: docker
   gather_facts: true
   vars:
-    # The Profile as per RAD-Ninjas scripts. CPU, GPU, metal (Mac), etc.
     ai_profile: cpu
     template_dir: ../templates
     docker_home: /home/docker
@@ -70,6 +69,7 @@
         project_src: "{{ docker_home }}/llm-on-prem"
         build: true
         pull: true
+        profile: "{{ ai_profile }}"
     - name: Make venv dir
       ansible.builtin.file:
         path: "{{ docker_home }}/llm-on-prem/venv"

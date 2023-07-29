@@ -30,17 +30,17 @@ export MODEL_BASE_PATH="http://${HOSTNAME}:8000/v1"
 # export MODEL_NAME="Llama-2-7b-chat-hf"
 
 # Model Path
-export MODEL_PATH="lmsys/vicuna-7b-v1.3"
+export MODEL_PATH="{{ ai_model_path }}"
 
 # HuggingFace Model Name
-export MODEL_NAME="vicuna-7b-v1.3"
+export MODEL_NAME="{{ ai_model_name }}"
 
 # Number of CPU threads to use for CPU inference
-export CPU_THREADS=5
+export CPU_THREADS={{ ai_cpu_threads }}
 
 # OpenVINO Settings
-export IR_PATH=/home/openvino/models/llama-2/ir_model
-export DEVICE="GPU.1"
+export IR_PATH={{ ai_openvino_ir_path }}
+export DEVICE="{{ ai_openvino_device }}"
 
 # Pytorch config
 export OM_NUM_THREADS=8

@@ -36,8 +36,8 @@ MODEL_PATH="lmsys/vicuna-7b-v1.3"
 MODEL_NAME="vicuna-7b-v1.3"
 
 # Number of CPU threads to use for CPU inference
-CPU_THREADS=5
+CPU_THREADS={{ ai_cpu_threads }}
 
 # OpenVINO Settings
-IR_PATH=/home/openvino/models/llama-2/ir_model
-DEVICE="GPU.1"
+IR_PATH={{ ai_openvino_ir_path }}
+DEVICE="{{ ai_openvino_device }}"

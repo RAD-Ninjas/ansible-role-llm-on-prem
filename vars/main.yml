@@ -5,3 +5,19 @@
 # DO NOT put actual keys here. This example uses 1password by default.
 ai_huggingface_token: "{{ lookup('community.general.onepassword', 'home-network-huggingface-read-token', field='password', vault='HomeAutomation') }}"
 ai_openai_api_key: "{{ lookup('community.general.onepassword', 'home-network-openai-api-key', field='password', vault='HomeAutomation') }}"
+
+# The Path of the LLM model in huggingface.
+# Vicuna is open and safe to test with. You can also use meta-llama/Llama-2-7b-chat-hf 
+# if you have access to it.
+llm_model_path: lmsys/vicuna-7b-v1.3
+# Tha name of the model in huggingface.
+llm_model_name: vicuna-7b-v1.3
+
+# These can be cpu, cuda, metal (for Mac), etc
+ai_profile: cpu
+
+# Number of CPU threads to use for CPU inference
+ai_cpu_threads: 5
+
+ai_openvino_ir_path: /home/openvino/models/llama-2/ir_model
+ai_openvino_device: GPU.1
