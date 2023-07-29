@@ -1,14 +1,5 @@
-# tasks file for ansible-role-llm-on-prem
+# Tasks file for ansible-role-llm-on-prem
 # Sets up an LLM on a box. WIP.
-
-# Group Vars has this (uses 1password for secure token storage):
-# ai_huggingface_token: "{{ lookup('community.general.onepassword', 'home-network-huggingface-read-token', field='password', vault='YourVaultName') }}"
-# ai_openai_api_key: "{{ lookup('community.general.onepassword', 'home-network-openai-api-key', field='password', vault='YourVaultName') }}"
-
-# And then the J2 scripts can just read like:
-# HF_TOKEN="{{ ai_huggingface_token }}"
-# OPENAI_API_KEY="{{ ai_openai_api_key }}"
-
 ---
 - hosts: llm_on_prem
   name: An LLM on a box
@@ -55,21 +46,21 @@
         depth: 1
     - name: Set up funky script to download models
       ansible.builtin.template:
-        src: "{{ template_dir }}/home-pve/services/llm-on-prem/download-model.sh.j2"
+        src: "{{ template_dir }}/llm-on-prem/download-model.sh.j2"
         dest: "{{ docker_home }}/llm-on-prem/download-model.sh"
         owner: docker
         group: docker
         mode: "0755"
     - name: Set up LLM on prem .env
       ansible.builtin.template:
-        src: "{{ template_dir }}/home-pve/services/llm-on-prem/dotenv.j2"
+        src: "{{ template_dir }}/llm-on-prem/dotenv.j2"
         dest: "{{ docker_home }}/llm-on-prem/.env"
         owner: docker
         group: docker
         mode: "0644"
     - name: Set up LLM on prem .env.mac
       ansible.builtin.template:
-        src: "{{ template_dir }}/home-pve/services/llm-on-prem/dotenv.mac.j2"
+        src: "{{ template_dir }}/llm-on-prem/dotenv.mac.j2"
         dest: "{{ docker_home }}/llm-on-prem/.env.mac"
         owner: docker
         group: docker

@@ -1,0 +1,43 @@
+#
+# PUBLIC ENVIRONMENT VARIABLES, EXPOSED TO THE BROWSER
+#
+NEXT_PUBLIC_PANGEA_DOMAIN="$NEXT_PUBLIC_PANGEA_DOMAIN$"
+NEXT_PUBLIC_AUTHN_CLIENT_TOKEN="$NEXT_PUBLIC_AUTHN_CLIENT_TOKEN$"
+NEXT_PUBLIC_AUTHN_HOSTED_LOGIN_URL="$NEXT_PUBLIC_AUTHN_HOSTED_LOGIN_URL$"
+
+#
+# PRIVATE ENVIRONMENT VARIABLES, NOT EXPOSED TO THE BROWSER
+# ONLY AVAILABLE ON THE SERVER
+#
+PANGEA_SERVICE_TOKEN="$PANGEA_SERVICE_TOKEN$"
+OPENAI_API_KEY="{{ ai_openai_api_key }}"
+OPTIONS_REDACT_USER_PROMPTS="true"
+OPTIONS_AUDIT_USER_PROMPTS="true"
+OPTIONS_THREAT_ANALYSE_SERVICE_RESPONSES="true"
+
+# Replace with your huggingface token
+HF_TOKEN="{{ ai_huggingface_token }}"
+
+# Keep this the same if running locally
+MODEL_BASE_PATH="http://fastchat-api-server:8000/v1"
+
+# LLM Runtime Settings =============================
+
+# Model Path
+# For when I'm cool enough
+#MODEL_PATH="meta-llama/Llama-2-7b-chat-hf"
+
+# HuggingFace Model Name
+# For when I'm cool enough
+#MODEL_NAME="Llama-2-7b-chat-hf"
+MODEL_PATH="lmsys/vicuna-7b-v1.3"
+
+# HuggingFace Model Name
+MODEL_NAME="vicuna-7b-v1.3"
+
+# Number of CPU threads to use for CPU inference
+CPU_THREADS=5
+
+# OpenVINO Settings
+IR_PATH=/home/openvino/models/llama-2/ir_model
+DEVICE="GPU.1"
