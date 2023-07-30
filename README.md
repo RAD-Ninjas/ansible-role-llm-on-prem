@@ -27,6 +27,8 @@ Use it:
         # Never store passwords insecurely
         ai_huggingface_token: "{{ lookup('community.general.onepassword', 'huggingface-read-token', field='password', vault='YourVaultName') }}"
         ai_openai_api_key: "{{ lookup('community.general.onepassword', 'penai-api-key', field='password', vault='YourVaultName') }}"
+        docker_username: "{{ lookup('community.general.onepassword', 'home-network-docker-username', field='username', vault='HomeAutomation') }}"
+        docker_password: "{{ lookup('community.general.onepassword', 'home-network-docker-username', field='password', vault='HomeAutomation') }}"
 
 Requirements
 ------------

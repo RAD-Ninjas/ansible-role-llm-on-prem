@@ -6,6 +6,9 @@
 ai_huggingface_token: "{{ lookup('community.general.onepassword', 'home-network-huggingface-read-token', field='password', vault='HomeAutomation') }}"
 ai_openai_api_key: "{{ lookup('community.general.onepassword', 'home-network-openai-api-key', field='password', vault='HomeAutomation') }}"
 
+docker_username: "{{ lookup('community.general.onepassword', 'home-network-docker-username', field='username', vault='HomeAutomation') }}"
+docker_password: "{{ lookup('community.general.onepassword', 'home-network-docker-username', field='password', vault='HomeAutomation') }}"
+
 # The Path of the LLM model in huggingface.
 # Vicuna is open and safe to test with. You can also use meta-llama/Llama-2-7b-chat-hf 
 # if you have access to it.

@@ -81,7 +81,17 @@ galaxy_info:
     # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
     #       Maximum 20 tags per role.
 
-dependencies: []
+dependencies:
+  - role: geerlingguy.docker
+    docker_edition: 'ce'
+    docker_packages:
+      - "docker-{{ docker_edition }}"
+      - "docker-{{ docker_edition }}-cli"
+      # - "docker-{{ docker_edition }}-rootless-extras"
+    docker_users:
+      - "{{ ai_user }}"
+    docker_group_members:
+      - "docker"
   # - role: common
   # - role: docker
   # - role: python

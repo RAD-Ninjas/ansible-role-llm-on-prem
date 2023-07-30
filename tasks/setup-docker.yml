@@ -1,0 +1,31 @@
+---
+- name: Create docker group if needed
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Create user if needed and make sure it can run docker.
+  ansible.builtin.user:
+    name: "{{ ai_user }}"
+    shell: /bin/zsh
+    state: present
+    groups: docker
+
+- name: Docker group can use /var/lib/docker
+  become_user: root
+  ansible.builtin.file:
+    path: /var/lib/docker
+    state: directory
+    owner: root
+    group: docker
+    mode: '0770'
+    recurse: true
+
+- name: Clone llm-on-prem
+  become_user: "{{ ai_user }}"
+  ansible.builtin.git:
+    repo: "{{ llm_on_prem_url }}"
+    dest: "{{ llm_on_prem_home }}"
+    version: "{{ llm_on_prem_version }}"
+    force: true
+    depth: 1

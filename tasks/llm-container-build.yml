@@ -1,9 +1,36 @@
 ---
+# - name: Install Docker if not there
+#   ansible.builtin.package:
+#     name: docker
+#     state: present
+#     # version: ">= 24"
+- name: Run Docker Login
+  become_user: "{{ ai_user }}"
+  # become_user: root
+  community.docker.docker_login:
+    username: "{{ docker_username }}"
+    password: "{{ docker_password }}"
+  register: docker_login_result
+- name: Log login results
+  ansible.builtin.debug:
+    var: docker_login_result
 - name: Run Docker compose build
   become_user: "{{ ai_user }}"
+  # become_user: root
   community.docker.docker_compose:
     project_src: "{{ llm_on_prem_home }}"
+    debug: true
     build: true
     pull: true
+    nocache: true
+    # docker_url: "index.docker.io/v1"
     profiles:
       - "{{ ai_profile }}"
+  register: compose_build_result
+- name: Log Compose results
+  ansible.builtin.debug:
+    var: compose_build_result
+
+# - name: Log out of DockerHub
+#   community.docker.docker_login:
+#     state: absent
