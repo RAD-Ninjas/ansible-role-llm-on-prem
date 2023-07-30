@@ -14,19 +14,34 @@
 - name: Log login results
   ansible.builtin.debug:
     var: docker_login_result
+
+# TODO Using the community task fails because it won't download the files.
+# But running 
 - name: Run Docker compose build
   become_user: "{{ ai_user }}"
   # become_user: root
   community.docker.docker_compose:
-    project_src: "{{ llm_on_prem_home }}"
+    project_src: "{{ llm_on_prem_home_docker_compose_home }}"
+    # chdir: "{{ llm_on_prem_home_docker_compose_home }}"
     debug: true
     build: true
     pull: true
     nocache: true
+    tls_hostname: "index.docker.io"
     # docker_url: "index.docker.io/v1"
     profiles:
       - "{{ ai_profile }}"
+    files:
+    - docker-compose.yml
   register: compose_build_result
+
+# - name: Run docker compose --profile {{ ai_profile }} build
+#   become_user: "{{ ai_user }}"
+#   ansible.builtin.command:
+#     chdir: "{{ llm_on_prem_home_docker_compose_home }}"
+#     cmd: "docker-compose --profile {{ ai_profile }} build"
+#   register: compose_build_result
+
 - name: Log Compose results
   ansible.builtin.debug:
     var: compose_build_result
