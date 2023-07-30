@@ -30,3 +30,13 @@ ai_super_user: root
 
 # If you want to install a tag or specific version, use this. Otherwise it will just go to the latest main checkin.
 llm_on_prem_version: "main"
+
+llm_on_prem_template_dir: ../templates
+llm_on_prem_home_dir: "/home/{{ ai_user }}"
+llm_on_prem_home: "{{ llm_on_prem_home_dir }}/llm-on-prem"
+llm_on_prem_url: https://github.com/RAD-Ninjas/llm-on-prem
+llm_on_prem_install_script: "{{llm_on_prem_home}}/models/scripts/start-mac-worker.sh"
+llm_on_prem_dockerfile: "{{llm_on_prem_home}}/docker-compose.yml"
+# Home for the python virtual environment the inference workers will use
+llm_on_prem_venv_home: "{{ llm_on_prem_home }}/venv"
+huggingface_cache_dir: "{{ llm_on_prem_home_dir }}/.cache/huggingface"

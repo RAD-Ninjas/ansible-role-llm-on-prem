@@ -1,0 +1,8 @@
+---
+- name: Run Docker compose build
+  become_user: "{{ ai_user }}"
+  community.docker.docker_compose:
+    project_src: "{{ llm_on_prem_home }}"
+    build: true
+    pull: true
+    profile: "{{ ai_profile }}"

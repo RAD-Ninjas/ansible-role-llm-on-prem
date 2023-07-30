@@ -1,0 +1,15 @@
+---
+- name: Check for HF Worker
+  ansible.builtin.stat:
+    # TODO I wish I could have the cache name for the model here.
+    # Ideally I could run the python module that determines the cache location and use that as the path. Oy.
+    path: "{{ huggingface_cache_dir }}/hub/version.txt"
+  register: hf_cache_exists
+
+- name: Run the download model script
+  ansible.builtin.command:
+    cmd: ./download_model.sh
+    chdir: "{{ llm_on_prem_home_dir }}/llm-on-prem"
+  register: download_model_output
+  changed_when: download_model_output.stdout != ""
+  when: not hf_cache_exists.stat.exists

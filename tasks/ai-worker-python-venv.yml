@@ -1,0 +1,34 @@
+---
+- name: Make venv dir
+  become_user: "{{ ai_user }}"
+  ansible.builtin.file:
+    path: "{{ llm_on_prem_venv_home }}"
+    state: directory
+    owner: "{{ ai_user }}"
+    group: "{{ ai_group }}"
+    mode: "0755"
+- name: Check for python venv
+  become_user: "{{ ai_user }}"
+  ansible.builtin.stat:
+    path: "{{ llm_on_prem_home_dir }}/llm-on-prem/venv/bin/activate"
+  register: venv_exists
+
+- name: Create & activate python venv
+  become_user: "{{ ai_user }}"
+  ansible.builtin.command:
+    cmd: python3 -m venv venv
+    chdir: "{{ llm_on_prem_home_dir }}/llm-on-prem"
+  when: not venv_exists.stat.exists
+
+- name: Install requirements on venv
+  ansible.builtin.pip:
+    requirements: "{{ llm_on_prem_home_dir }}/llm-on-prem/models/assets/mac-requirements.txt"
+    virtualenv: "{{ llm_on_prem_home_dir }}/llm-on-prem/venv"
+
+# Comment task out if you want to use the GPU (which your container needs to be able to get to)
+# - name: First Install torch from the CPU repo
+#   ansible.builtin.pip:
+#     name: torch
+#     virtualenv: "{{ llm_on_prem_home_dir }}/llm-on-prem/venv"
+#     The pytorch needs to install from this index or it will fail because the LXC container is unprivileged.
+#     extra_args: --index-url https://download.pytorch.org/whl/cpu
