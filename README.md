@@ -83,7 +83,7 @@ Troubleshooting
 
 This ansible role should work on any machine that is compatible with docker.
 
-If you use a container-in-container option such as Proxmox or other Hypervisors, the container you use **must** have Nesting (so docker can run in the first place) and NFS support (so docker can mount its own volumes).
+If you use a container-in-container option such as Proxmox or other Hypervisors, the container you use **must** have Nesting (so docker can run in the first place) and NFS support (so docker can mount its own volumes). And it may be best if you either remove AppArmor from the container or configure it to run the specific docker processes on llm-on-prem.
 
 License
 -------
