@@ -3,6 +3,31 @@ LLM On Prem Ansible Role
 
 Sets up Rad-Ninjas' [LLM On Prem](https://github.com/RAD-Ninjas/llm-on-prem)
 
+Quick Start
+-----------
+
+Add to requirements.yml:
+
+    ---
+    - name: llm_on_prem
+      src: https://github.com/RAD-Ninjas/ansible-role-llm-on-prem.git
+      scm: git
+
+Install the role
+
+    $ ansible-galaxy install -r requirements.yml
+
+Use it:
+
+    - role: llm_on_prem
+      vars:
+        llm_model_path: lmsys/vicuna-7b-v1.3
+        llm_model_name: vicuna-7b-v1.3
+        ai_profile: cpu
+        # Never store passwords insecurely
+        ai_huggingface_token: "{{ lookup('community.general.onepassword', 'huggingface-read-token', field='password', vault='YourVaultName') }}"
+        ai_openai_api_key: "{{ lookup('community.general.onepassword', 'penai-api-key', field='password', vault='YourVaultName') }}"
+
 Requirements
 ------------
 
@@ -13,8 +38,11 @@ Role Variables
 
 ### Token Storage
 
-     ai_huggingface_token: "{{ lookup('community.general.onepassword', 'home-network-huggingface-read-token', field='password', vault='YourVaultName') }}"
-     ai_openai_api_key: "{{ lookup('community.general.onepassword', 'home-network-openai-api-key', field='password', vault='YourVaultName') }}"
+By default, the huggingface token and API keys read as follows:
+
+    ai_huggingface_token: "{{ lookup('community.general.onepassword', 'home-network-huggingface-read-token', field='password', vault='YourVaultName') }}"
+
+    ai_openai_api_key: "{{ lookup('community.general.onepassword', 'home-network-openai-api-key', field='password', vault='YourVaultName') }}"
 
 ### Model Variables
 

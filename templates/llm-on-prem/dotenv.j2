@@ -28,12 +28,10 @@ MODEL_BASE_PATH="http://fastchat-api-server:8000/v1"
 #MODEL_PATH="meta-llama/Llama-2-7b-chat-hf"
 
 # HuggingFace Model Name
-# For when I'm cool enough
-#MODEL_NAME="Llama-2-7b-chat-hf"
-MODEL_PATH="lmsys/vicuna-7b-v1.3"
+MODEL_PATH="{{ llm_model_path }}"
 
 # HuggingFace Model Name
-MODEL_NAME="vicuna-7b-v1.3"
+MODEL_NAME="{{ llm_model_name }}"
 
 # Number of CPU threads to use for CPU inference
 CPU_THREADS={{ ai_cpu_threads }}

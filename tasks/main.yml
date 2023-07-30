@@ -1,27 +1,32 @@
 # Tasks file for ansible-role-llm-on-prem
 # Sets up an LLM on a box. WIP.
+galaxy_info:
+  standalone: true
 ---
-- hosts: llm_on_prem
-  name: An LLM on a box
+- name: An LLM on a box
   become: true
-  become_user: docker
+  become_user: "{{ ai_user }}"
   gather_facts: true
   vars:
     ai_profile: cpu
-    template_dir: ../templates
-    docker_home: /home/docker
+    llm_on_prem_template_dir: ../templates
+    llm_on_prem_home_dir: "/home/{{ ai_user }}"
+    llm_on_prem_home: "{{ llm_on_prem_home_dir }}/llm-on-prem"
     llm_on_prem_url: https://github.com/RAD-Ninjas/llm-on-prem
-    llm_on_prem_install_script: /home/docker/llm-on-prem/models/scripts/start-mac-worker.sh
-    llm_on_prem_dockerfile: /home/docker/llm-on-prem/docker-compose.yml
+    llm_on_prem_install_script: "{{llm_on_prem_home}}/models/scripts/start-mac-worker.sh"
+    llm_on_prem_dockerfile: "{{llm_on_prem_home}}/docker-compose.yml"
+    # Home for the python virtual environment the inference workers will use
+    llm_on_prem_venv_home: "{{ llm_on_prem_home }}/venv"
+    huggingface_cache_dir: "{{ llm_on_prem_home_dir }}/.cache/huggingface"
   pre_tasks:
   tasks:
     - name: Install python3
-      become_user: root
+      become_user: "{{ ai_super_user }}"
       ansible.builtin.package:
         name: python3
         state: present
     - name: Install python3-pip
-      become_user: root
+      become_user: "{{ ai_super_user }}"
       ansible.builtin.package:
         name: python3-pip
         state: present
@@ -29,7 +34,7 @@
       ansible.builtin.command:
         cmd: pip install -U pip
     - name: Install python3-venv
-      become_user: root
+      become_user: "{{ ai_super_user }}"
       ansible.builtin.package:
         name: python3-venv
         state: present
@@ -39,72 +44,72 @@
     - name: Clone llm-on-prem
       ansible.builtin.git:
         repo: "{{ llm_on_prem_url }}"
-        dest: "{{ docker_home }}/llm-on-prem"
-        version: main
+        dest: "{{ llm_on_prem_home }}"
+        version: "{{ llm_on_prem_version }}"
         force: true
         depth: 1
     - name: Set up funky script to download models
       ansible.builtin.template:
-        src: "{{ template_dir }}/llm-on-prem/download-model.sh.j2"
-        dest: "{{ docker_home }}/llm-on-prem/download-model.sh"
-        owner: docker
-        group: docker
+        src: "{{ llm_on_prem_template_dir }}/llm-on-prem/download-model.sh.j2"
+        dest: "{{ llm_on_prem_home }}/download-model.sh"
+        owner: "{{ ai_user }}"
+        group: "{{ ai_group }}"
         mode: "0755"
     - name: Set up LLM on prem .env
       ansible.builtin.template:
-        src: "{{ template_dir }}/llm-on-prem/dotenv.j2"
-        dest: "{{ docker_home }}/llm-on-prem/.env"
-        owner: docker
-        group: docker
+        src: "{{ llm_on_prem_template_dir }}/llm-on-prem/dotenv.j2"
+        dest: "{{ llm_on_prem_home }}/.env"
+        owner: "{{ ai_user }}"
+        group: "{{ ai_group }}"
         mode: "0644"
     - name: Set up LLM on prem .env.mac
       ansible.builtin.template:
-        src: "{{ template_dir }}/llm-on-prem/dotenv.mac.j2"
-        dest: "{{ docker_home }}/llm-on-prem/.env.mac"
-        owner: docker
-        group: docker
+        src: "{{ llm_on_prem_template_dir }}/llm-on-prem/dotenv.mac.j2"
+        dest: "{{ llm_on_prem_home }}/.env.mac"
+        owner: "{{ ai_user }}"
+        group: "{{ ai_group }}"
         mode: "0644"
     - name: Run Docker compose build
       community.docker.docker_compose:
-        project_src: "{{ docker_home }}/llm-on-prem"
+        project_src: "{{ llm_on_prem_home }}"
         build: true
         pull: true
         profile: "{{ ai_profile }}"
     - name: Make venv dir
       ansible.builtin.file:
-        path: "{{ docker_home }}/llm-on-prem/venv"
+        path: "{{ llm_on_prem_venv_home }}"
         state: directory
-        owner: docker
-        group: docker
+        owner: "{{ ai_user }}"
+        group: "{{ ai_group }}"
         mode: "0755"
     - name: Check for python venv
       ansible.builtin.stat:
-        path: "{{ docker_home }}/llm-on-prem/venv/bin/activate"
+        path: "{{ llm_on_prem_home_dir }}/llm-on-prem/venv/bin/activate"
       register: venv_exists
     - name: Create activate python venv
       ansible.builtin.command:
         cmd: python3 -m venv venv
-        chdir: "{{ docker_home }}/llm-on-prem"
-      when: not venv_exists.stat.exists        
+        chdir: "{{ llm_on_prem_home_dir }}/llm-on-prem"
+      when: not venv_exists.stat.exists
     # Comment task out if you want to use the GPU (which your container needs to be able to get to)
     # - name: First Install torch from the CPU repo
     #   ansible.builtin.pip:
     #     name: torch
-    #     virtualenv: "{{ docker_home }}/llm-on-prem/venv"
+    #     virtualenv: "{{ llm_on_prem_home_dir }}/llm-on-prem/venv"
     #     extra_args: --index-url https://download.pytorch.org/whl/cpu
     - name: Install requirements on venv
       ansible.builtin.pip:
-        requirements: "{{ docker_home }}/llm-on-prem/models/assets/mac-requirements.txt"
-        virtualenv: "{{ docker_home }}/llm-on-prem/venv"
+        requirements: "{{ llm_on_prem_home_dir }}/llm-on-prem/models/assets/mac-requirements.txt"
+        virtualenv: "{{ llm_on_prem_home_dir }}/llm-on-prem/venv"
         # The pytorch needs to install from this index or it will fail because the LXC container is unprivileged.
     - name: Check for HF Worker
       ansible.builtin.stat:
         # TODO I wish I could have the cache name for the model here.
         # Ideally I could run the python module that determines the cache location and use that as the path. Oy.
-        path: "{{ docker_home }}/.cache/huggingface/hub/version.txt"
+        path: "{{ huggingface_cache_dir }}/hub/version.txt"
       register: hf_cache_exists
     - name: Run the download model script
       ansible.builtin.command:
-          cmd: ./download_model.sh
-          chdir: "{{ docker_home }}/llm-on-prem"
-      when: not hf_cache_exists.stat.exists        
+        cmd: ./download_model.sh
+        chdir: "{{ llm_on_prem_home_dir }}/llm-on-prem"
+      when: not hf_cache_exists.stat.exists

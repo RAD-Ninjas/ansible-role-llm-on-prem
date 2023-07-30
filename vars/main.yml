@@ -21,3 +21,12 @@ ai_cpu_threads: 5
 
 ai_openvino_ir_path: /home/openvino/models/llama-2/ir_model
 ai_openvino_device: GPU.1
+
+# The user to become when running docker commands and instaling the inference
+ai_user: "docker"
+ai_group: "docker"
+
+ai_super_user: root
+
+# If you want to install a tag or specific version, use this. Otherwise it will just go to the latest main checkin.
+llm_on_prem_version: "main"
