@@ -67,9 +67,23 @@ Example Playbook
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: llmservers
+    - hosts: llm_on_prem_hosts
       roles:
-         - { role: username.ansible-role-llm-on-prem, profile: gpu }
+        - role: llm_on_prem
+          vars:
+            # The Profile as per RAD-Ninjas scripts. CPU, GPU, metal (Mac), etc.
+            ai_profile: cpu
+            ai_huggingface_token: "{{ lookup('community.general.onepassword', 'huggingface-read-token', field='password', vault='MyVault') }}"
+            ai_openai_api_key: "{{ lookup('community.general.onepassword', 'openai-api-key', field='password', vault='MyVault') }}"
+            docker_username: "{{ lookup('community.general.onepassword', 'docker', field='username', vault='MyVault') }}"
+            docker_password: "{{ lookup('community.general.onepassword', 'docker', field='password', vault='MyVault') }}"
+
+Troubleshooting
+---------------
+
+This ansible role should work on any machine that is compatible with docker.
+
+If you use a container-in-container option such as Proxmox or other Hypervisors, the container you use **must** have Nesting (so docker can run in the first place) and NFS support (so docker can mount its own volumes).
 
 License
 -------
@@ -80,3 +94,4 @@ Author Information
 ------------------
 
 This role was written [David Martinez](https://github.com/hackerdude) with help with the amazing AI folks at [RAD-Ninjas](https://github.com/RAD-Ninjas).
+

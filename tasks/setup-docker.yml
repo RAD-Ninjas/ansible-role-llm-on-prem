@@ -7,7 +7,6 @@
 - name: Create user if needed and make sure it can run docker.
   ansible.builtin.user:
     name: "{{ ai_user }}"
-    shell: /bin/zsh
     state: present
     groups: docker
 

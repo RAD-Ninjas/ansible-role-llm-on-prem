@@ -83,15 +83,16 @@ galaxy_info:
 
 dependencies:
   - role: geerlingguy.docker
+    become: true
     docker_edition: 'ce'
     docker_packages:
       - "docker-{{ docker_edition }}"
       - "docker-{{ docker_edition }}-cli"
-      # - "docker-{{ docker_edition }}-rootless-extras"
+      - "docker-{{ docker_edition }}-rootless-extras"
     docker_users:
       - "{{ ai_user }}"
     docker_group_members:
-      - "docker"
+      - "{{ ai_user }}"
   # - role: common
   # - role: docker
   # - role: python
