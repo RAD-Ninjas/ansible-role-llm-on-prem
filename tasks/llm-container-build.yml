@@ -5,4 +5,5 @@
     project_src: "{{ llm_on_prem_home }}"
     build: true
     pull: true
-    profile: "{{ ai_profile }}"
+    profiles:
+      - "{{ ai_profile }}"

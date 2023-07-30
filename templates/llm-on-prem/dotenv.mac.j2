@@ -24,16 +24,10 @@ export MODEL_BASE_PATH="http://${HOSTNAME}:8000/v1"
 # LLM Runtime Settings =============================
 
 # Model Path
-# export MODEL_PATH="{{ llm_model_path }}"
+export MODEL_PATH="{{ llm_model_path }}"
 
 # HuggingFace Model Name
-# export MODEL_NAME="{{ llm_model_name }}"
-
-# Model Path
-export MODEL_PATH="{{ ai_model_path }}"
-
-# HuggingFace Model Name
-export MODEL_NAME="{{ ai_model_name }}"
+export MODEL_NAME="{{ llm_model_name }}"
 
 # Number of CPU threads to use for CPU inference
 export CPU_THREADS={{ ai_cpu_threads }}
